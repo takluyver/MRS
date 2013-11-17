@@ -1,4 +1,4 @@
-function [spectra, Peak_ratios, Metabolites] = MRS_read_jMRUI_txt_output_v3()
+function [spectra, Peak_ratios, Metabolites] = read_jMRUI_txt()
 % Load jMRUI output (.txt) data and interpret the format
 % of the saved data. If multiple acquisitions were acquired, it will detect
 % values outside a specified range and provide a sorted list of spectra
