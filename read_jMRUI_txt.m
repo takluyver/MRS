@@ -65,19 +65,28 @@ switch num_spectra;
 end
 
 %% categorize spectra
-a = 1; b = 1; c = 1;
-for i = 1:size(data,2),
-    if data(NAA_peak,i)<-2000,
-        spectra.diff(:,a) = data(:,i);
-        a = a + 1;
-    elseif data(NAA_peak,i)>2000,
-        spectra.off(:,b) = data(:,i);
-        b = b + 1;
+done=0;
+while ~done
+    figure(1); hold;
+    plot(data); xlim([1200 1500]);
+    line([NAA_peak NAA_peak],[min(min(data(1200:1500,:))) max(max(data(1200:1500,:)))]);
+
+    changeNAApeak= input('NAA peak roughly correct? (1=yes, 0=no):');
+    if changeNAApeak==1;
+        done=1;
     else
-        spectra.on(:,c) = data(:,i);
-        c = c + 1;
+        NAA_peak=input('input new value: ');
     end
+    close(figure(1));
 end
+
+[x,y]=sort(data(NAA_peak,:));
+numPerFile=length(y)/3;
+spectra.diff= data(:,y(1:numPerFile));
+spectra.on=data(:,y(numPerFile+1:numPerFile*2));
+spectra.off=data(:,y(numPerFile*2+1:end));
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT & SORT DATA %%%%%%%%%%%%%%%%%%%%%%%%% %%
 %% Plot all data if single measure from scanner
 
 switch num_spectra,
@@ -218,18 +227,6 @@ switch num_spectra,
 %         spectra.trimmed_sum_On_w_Off = spectra.trimmed_mean_on + spectra.trimmed_mean_off;
          spectra.trimmed_sum_On_w_Off = mean([spectra.trimmed_mean_off'; spectra.trimmed_mean_on'])'; %possibly use average instead of sum;
 
-%%      Surface Plot of mean +/- stdev
-%         xlims = [0 600]; 
-%         figure3 = figure();
-%         errorSurface(xrange-(xrange(1)-1),mean(data(xrange,:),2)', stdev_data(xrange)');
-%         hold
-%         plot(mean(data(xrange,:)')','k');
-%         title_text = sprintf('%s Mean (+/- Stdev)', spectra_type);
-%         Title(title_text);
-%         xlim(xlims);
-%         worst_sample = sorted_num_of_outliers(1,1);
-%         plot(data(xrange,worst_sample),'r');
-
 %% Plot and Identify peaks in Diff Spectrum
         figure3 = figure(3);
         
@@ -250,6 +247,7 @@ switch num_spectra,
             disp('Peaks have been identified.');
         end
 end
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%  CALCULATE RATIOS %%%%%%%%%%%%%%%%%%%%%%%%%% %%
 %% Calculate Glx reference point and adjusted xrange for data       
     Glx_peak1 = locs(end);
     Glx_peak2 = locs(end-1);
@@ -294,16 +292,6 @@ end
      hold
  end
 
-%         [pks, locs] = findpeaks(spectra.trimmed_mean_diff(adjusted_xrange), 'minpeakheight', dif_minimum_peak_height);                  
-%         for i = 1:length(locs),
-%             plotline(locs(i),'v');
-%         end
-
-    % Cr
-
-%             GABA_peak_range = locs(4)-round(size(data,1)/120):locs(4)+round(size(data,1)/100);
-%             GABA_baseline.left = locs(4)-round(size(data,1)/30):locs(4)-round(size(data,1)/60);            
-%             GABA_baseline.right = locs(4)+round(size(data,1)/100):locs(4)+round(size(data,1)/60);
 
     GABA_peak_range = 273:348;
     GABA_baseline.left = 251:272;
